@@ -8,7 +8,7 @@ use App\Models\Student;
 
 class StudentController extends Controller
 {
-    //
+    // GET
     public function index(){
         //melihat data
         //query builder student = DB::table('student')->get();
@@ -19,7 +19,7 @@ class StudentController extends Controller
         ];
         return response()->json($data, 200);
     }
-
+    // POST
     public function store(Request $request){
         $input = [
             'nama' => $request->nama,
@@ -35,7 +35,7 @@ class StudentController extends Controller
     ];
     return response()->json($data, 201);
     }
-
+    // PUT
     public function update(Request $request, $id){
     $student = Student::find($id);
 
@@ -49,7 +49,7 @@ class StudentController extends Controller
 
     return response()->json(['message' => 'Data tidak ditemukan'], 404);
     }
-
+    // DELETE
     public function destroy($id){
     $student = Student::find($id);
 
