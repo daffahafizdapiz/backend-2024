@@ -1,259 +1,190 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
 use App\Models\Employees;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
 
 class EmployeesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // GET - Menampilkan semua data pegawai
     public function index()
     {
         $employees = Employees::all();
 
         if ($employees->isEmpty()) {
             return response()->json([
-                'message' => 'Data is empty'
-            ], 200);
+                'message' => 'Employees data not found',
+                'data' => []
+            ], 404);
         }
 
         return response()->json([
-            'message' => 'Get All Resource',
+            'message' => 'Successfully accessed data',
             'data' => $employees
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // POST - Menambahkan data pegawai
     public function store(Request $request)
     {
-        // Validasi data yang diterima
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'gender' => 'required|in:male,female',
+            'gender' => 'required|in:m,f',
             'phone' => 'required|string|max:20',
             'address' => 'required|string',
             'email' => 'required|email|unique:employees,email',
             'status' => 'required|in:active,inactive,terminated',
             'hired_on' => 'required|date',
         ]);
-    
-        // Jika validasi gagal, kembalikan respon dengan error
+
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 400);
+                'message' => 'Validation errors',
+                'error' => $validator->errors()
+            ], 204);
         }
 
-        // Menyimpan data pegawai baru
-        $employee = Employees::create([
-            'name' => $request->name,
-            'gender' => $request->gender,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'email' => $request->email,
-            'status' => $request->status,
-            'hired_on' => $request->hired_on,
-        ]);
+        $input = $validator->validated();
+        $employees = Employees::create($input);
 
-        // Mengembalikan response jika berhasil ditambahkan
         return response()->json([
-            'message' => 'Resource is added successfully',
-            'data' => $employee
+            'message' => 'Employees is created successfully',
+            'data' => $employees,
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        // Mencari employee berdasarkan ID
-        $employee = Employees::find($id);
-
-        // Cek jika data pegawai ditemukan
-        if (!$employee) {
-            return response()->json([
-                'message' => 'Resource not found'
-            ], 404);
-        }
-
-        // Mengembalikan data employee jika ditemukan
-        return response()->json([
-            'message' => 'Get Detail Resource',
-            'data' => $employee
-        ], 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    // PUT - Memperbarui data pegawai
     public function update(Request $request, $id)
     {
-        // Mencari employee berdasarkan ID
-        $employee = Employees::find($id);
+        $employees = Employees::find($id);
 
-        // Cek jika data pegawai ditemukan
-        if (!$employee) {
+        if (!$employees) {
             return response()->json([
-                'message' => 'Resource not found'
+                'message' => 'Employees not found'
             ], 404);
         }
 
-        // Validasi data yang diterima, hanya validasi yang diberikan
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'gender' => 'sometimes|in:male,female',
-            'phone' => 'sometimes|string|max:20',
-            'address' => 'sometimes|string',
-            'email' => 'sometimes|email|unique:employees,email,' . $id,
-            'status' => 'sometimes|in:active,inactive,terminated',
-            'hired_on' => 'sometimes|date',
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'gender' => 'sometimes|required|in:m,f',
+            'phone' => 'sometimes|required|string|max:20',
+            'address' => 'sometimes|required|string',
+            'email' => 'sometimes|required|email|unique:employees,email,' . $id,
+            'status' => 'sometimes|required|in:active,inactive,terminated',
+            'hired_on' => 'sometimes|required|date',
         ]);
 
-        // Jika validasi gagal, kembalikan respon dengan error
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 400);
-        }
+        $employees->update($request->all());
 
-        // Mengupdate data employee dengan data baru
-        $employee->update($request->only([
-            'name', 'gender', 'phone', 'address', 'email', 'status', 'hired_on'
-        ]));
-
-        // Mengembalikan response setelah update berhasil
         return response()->json([
-            'message' => 'Resource is updated successfully',
-            'data' => $employee
+            'message' => 'Employees is updated successfully',
+            'data' => $employees
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // DELETE - Menghapus data pegawai
     public function destroy($id)
     {
-        // Mencari employee berdasarkan ID
-        $employee = Employees::find($id);
+        $employees = Employees::find($id);
 
-        // Cek jika data pegawai ditemukan
-        if (!$employee) {
+        if (!$employees) {
             return response()->json([
-                'message' => 'Resource not found'
+                'message' => 'Employees not found'
             ], 404);
         }
 
-        // Menghapus data employee
-        $employee->delete();
+        $employees->delete();
 
-        // Mengembalikan response setelah resource berhasil dihapus
         return response()->json([
-            'message' => 'Resource is deleted successfully'
+            'message' => 'Employees is deleted successfully'
         ], 200);
     }
 
-    /**
-     * Search the resource by name.
-     */
-    public function search($name)
+    // GET (Show) - Menampilkan detail data pegawai
+    public function show($id)
     {
-        // Mencari employee berdasarkan nama
-        $employees = Employees::where('name', 'like', '%' . $name . '%')->get();
+        $employees = Employees::find($id);
 
-        // Cek jika ada resource yang ditemukan
-        if ($employees->isEmpty()) {
+        if (!$employees) {
             return response()->json([
-                'message' => 'Resource not found'
+                'message' => 'Employees not found'
             ], 404);
         }
 
-        // Mengembalikan response dengan data yang ditemukan
         return response()->json([
-            'message' => 'Get searched resource',
+            'message' => 'Get employees details',
             'data' => $employees
         ], 200);
     }
 
-    /**
-     * Get all active employees.
-     */
-    public function getActive()
-    {
-        // Mencari employee yang aktif
+    // GET - Menampilkan pegawai dengan status aktif
+    public function getActive() {
         $employees = Employees::where('status', 'active')->get();
 
-        // Cek jika ada resource yang ditemukan
         if ($employees->isEmpty()) {
             return response()->json([
-                'message' => 'Get active resource',
-                'total' => 0,
+                'message' => 'No active employees found',
                 'data' => []
-            ], 200);
+            ], 404);
         }
 
-        // Mengembalikan response dengan data yang ditemukan
         return response()->json([
-            'message' => 'Get active resource',
-            'total' => $employees->count(),
+            'message' => 'Successfully retrieved active employees',
             'data' => $employees
         ], 200);
     }
 
-    /**
-     * Get all inactive employees.
-     */
-    public function getInactive()
-    {
-        // Mencari employee yang tidak aktif
+    // GET - Menampilkan pegawai dengan status non-aktif
+    public function getInactive(){
         $employees = Employees::where('status', 'inactive')->get();
 
-        // Cek jika ada resource yang ditemukan
         if ($employees->isEmpty()) {
             return response()->json([
-                'message' => 'Get inactive resource',
-                'total' => 0,
+                'message' => 'No inactive employees found',
                 'data' => []
-            ], 200);
+            ], 404);
         }
 
-        // Mengembalikan response dengan data yang ditemukan
         return response()->json([
-            'message' => 'Get inactive resource',
-            'total' => $employees->count(),
+            'message' => 'Successfully retrieved inactive employees',
             'data' => $employees
         ], 200);
     }
 
-    /**
-     * Get all terminated employees.
-     */
-    public function getTerminated()
-    {
-        // Mencari employee yang dihentikan
+    // GET - Menampilkan pegawai dengan status terminated
+    public function getTerminated() {
         $employees = Employees::where('status', 'terminated')->get();
 
-        // Cek jika ada resource yang ditemukan
         if ($employees->isEmpty()) {
             return response()->json([
-                'message' => 'Get terminated resource',
-                'total' => 0,
+                'message' => 'No terminated employees found',
                 'data' => []
-            ], 200);
+            ], 404);
         }
 
-        // Mengembalikan response dengan data yang ditemukan
         return response()->json([
-            'message' => 'Get terminated resource',
-            'total' => $employees->count(),
+            'message' => 'Successfully retrieved terminated employees',
             'data' => $employees
         ], 200);
     }
+
+    // GET - Mencari pegawai berdasarkan nama
+    public function search($name) {
+        $employees = Employees::where('name', 'like', "%{$name}%")->get();
+
+        if ($employees->isEmpty()) {
+            return response()->json([
+                'message' => 'No employees found with that name',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Successfully retrieved employees by name',
+            'data' => $employees
+        ], 200);
+    }
+
 }

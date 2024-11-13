@@ -15,6 +15,7 @@ class Employees extends Model
      *
      * @var array<int, string>
      */
+    protected $table = 'employees';
     protected $fillable = [
         'name',
         'gender',
@@ -24,13 +25,5 @@ class Employees extends Model
         'status',
         'hired_on',
     ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'hired_on' => 'date',
-    ];
+    public $timestamps = false;
 }
