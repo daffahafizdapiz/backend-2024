@@ -36,7 +36,7 @@ class StudentController extends Controller
         ]);
 
         if($validator->fails()){
-            return respons()->json([
+            return response()->json([
                 'message'=>'Validation errors',
                 'error'=>$validator->errors()
             ], 422);
@@ -57,18 +57,18 @@ class StudentController extends Controller
 
         if (!$student) {
             return response()->json([
-                "message" => 'Student not found'
+                'message' => 'Student not found'
             ], 404);
         }
 
-        $validatedData = $request->validate([
+        $request->validate([
             'nama' => 'sometimes|required|string',
             'nim' => 'sometimes|required|string|unique:students,nim,' . $student->id,
             'email' => 'sometimes|required|email|unique:students,email,' . $student->id,
             'jurusan' => 'sometimes|required|string',
         ]);
 
-        $student->update($validatedData);
+        $student->update($request->all());
 
         return response()->json([
             'message' => 'Student is updated',
