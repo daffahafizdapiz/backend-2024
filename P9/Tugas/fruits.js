@@ -6,7 +6,7 @@
  * - Refactor variable ke ES6 Variable.
  */
 
-const fruits = ['apple', 'banana', 'mango', 'orange', 'grape'];
+const fruits = ['Jeruk', 'Apel', 'Durian'];
 
 // TODO 2: export variable fruits
 module.exports = fruits;
