@@ -6,16 +6,17 @@ const connection = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'alumni_db' 
+  database: process.env.DB_NAME || 'alumni_db',
 });
 
 // Menghubungkan ke database
 connection.connect((err) => {
   if (err) {
-    console.error('error connecting: ' + err.stack);
+    console.error('Error connecting: ' + err.stack);
     return;
   }
-  console.log('connected as id ' + connection.threadId);
+  console.log('Connected as id ' + connection.threadId);
 });
 
+// Menyediakan koneksi untuk digunakan di tempat lain
 module.exports = connection;

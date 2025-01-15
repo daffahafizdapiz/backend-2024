@@ -12,6 +12,7 @@ class AlumniController {
         return res.status(200).json({ message: 'Fetched all alumni', data: results });
       });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ message: 'Server error', error: err });
     }
   }
@@ -20,6 +21,7 @@ class AlumniController {
   static async store(req, res) {
     const { name, phone, address, graduation_year, status, company_name, position } = req.body;
 
+    // Validasi input
     if (!name || !phone || !address || !graduation_year || !status) {
       return res.status(422).json({ message: 'All fields must be filled correctly' });
     }
@@ -36,6 +38,7 @@ class AlumniController {
         return res.status(201).json({ message: 'Alumni added successfully', data: results });
       });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ message: 'Server error', error: err });
     }
   }
@@ -56,6 +59,7 @@ class AlumniController {
         return res.status(200).json({ message: 'Fetched alumni', data: results[0] });
       });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ message: 'Server error', error: err });
     }
   }
@@ -65,6 +69,7 @@ class AlumniController {
     const { id } = req.params;
     const { name, phone, address, graduation_year, status, company_name, position } = req.body;
 
+    // Validasi input
     if (!name || !phone || !address || !graduation_year || !status) {
       return res.status(422).json({ message: 'All fields must be filled correctly' });
     }
@@ -85,6 +90,7 @@ class AlumniController {
         }
       );
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ message: 'Server error', error: err });
     }
   }
@@ -105,6 +111,7 @@ class AlumniController {
         return res.status(200).json({ message: 'Alumni deleted successfully' });
       });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ message: 'Server error', error: err });
     }
   }
